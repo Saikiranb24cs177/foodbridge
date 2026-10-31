@@ -1,0 +1,54 @@
+import api from './api';
+
+export const authService = {
+  login: async (credentials) => {
+    const response = await api.post('/auth/login', credentials);
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      window.dispatchEvent(new Event('auth-changed'));
+    }
+    return response.data;
+  },
+
+  register: async (userData) => {
+    const response = await api.post('/auth/register', userData);
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      window.dispatchEvent(new Event('auth-changed'));
+    }
+    return response.data;
+  },
+
+  getCurrentUser: async () => {
+    const response = await api.get('/auth/me');
+    return response.data.user;
+  },
+
+  updateProfile: async (profileData) => {
+    const response = await api.put('/auth/profile', profileData);
+    if (response.data.user) {
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      window.dispatchEvent(new Event('auth-changed'));
+    }
+    return response.data;
+  },
+
+  logout: () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.dispatchEvent(new Event('auth-changed'));
+  },
+
+  getStoredUser: () => {
+    try {
+      const user = localStorage.getItem('user');
+      return user ? JSON.parse(user) : null;
+    } catch {
+      return null;
+    }
+  },
+
+  getToken: () => localStorage.getItem('token'),
+};
